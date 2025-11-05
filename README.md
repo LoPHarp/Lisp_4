@@ -41,7 +41,7 @@
 ```lisp
 (defun choise-Sort (lst &key (key nil) (test #'<))
   (let ((remove-first (lambda (elem input-list)
-                        (remove elem input-list :count 1))))
+                        (remove elem input-list :count 1 :test #'equal))))
     (labels
         ((find-min-elem (%lst min-elem key-min-elem)
            (if (null %lst)
@@ -52,31 +52,56 @@
                                           check-elem)))
                  (if (funcall test key-check-elem key-min-elem)
                      (find-min-elem (cdr %lst) check-elem key-check-elem)
-                     (find-min-elem (cdr %lst) min-elem key-min-elem))))
+                     (find-min-elem (cdr %lst) min-elem key-min-elem)))))
 
-
-         (sort (%lst)
-               (if (null (cdr %lst))
-                   %lst
-                   (let* ((first-min (car %lst))
-                          (key-first-min (if key
-                                             (funcall key first-min)
-                                             first-min))
-                          (min (find-min-elem (cdr %lst) first-min key-first-min))
-                          (rest (funcall remove-first min %lst))
-                          (sorted-rest (sort rest)))
-                     (cons min sorted-rest)))))))
-    (sort lst)))
+         (my-sort (%lst)
+           (if (null (cdr %lst))
+               %lst
+               (let* ((first-min (car %lst))
+                      (key-first-min (if key
+                                         (funcall key first-min)
+                                         first-min))
+                      (min (find-min-elem (cdr %lst) first-min key-first-min))
+                      (rest (funcall remove-first min %lst))
+                      (sorted-rest (my-sort rest)))
+                 (cons min sorted-rest)))))
+      (my-sort lst))))
 ```
 
 ### Тестові набори та утиліти першої частини
 ```lisp
-;;; Лістинг реалізації утилітних тестових функцій та тестових наборів
+(defun check-my-sort (name input expected &key (key nil) (test #'<))
+  "Виконує choise-Sort на 'input' з 'key' і 'test', порівнює з 'expected'"
+  (format t "~:[FAILED~;passed~] ~a~%"
+          (equal (choise-Sort input :key key :test test) expected)
+          name))
+
+(defun test-my-sort ()
+  (check-my-sort "Test 1: Просте сортування"
+                 '(5 1 4 2 3)
+                 '(1 2 3 4 5))
+  
+  (check-my-sort "Test 2: Зворотнє сортування (test #'>)"
+                 '(5 1 4 2 3)
+                 '(5 4 3 2 1)
+                 :test #'>)
+  
+  (check-my-sort "Test 3: Сортування за ключем (key #'second)"
+                 '((1 9) (2 5) (3 8))
+                 '((2 5) (3 8) (1 9))
+                 :key #'second)
+  
+  (check-my-sort "Test 4: Порожній список" '() '()))
 ```
 
 ### Тестування першої частини
 ```lisp
-;;; Виклик і результат виконання тестів
+CL-USER> (test-my-sort)
+passed Test 1: Просте сортування
+passed Test 2: Зворотнє сортування (test #'>)
+passed Test 3: Сортування за ключем (key #'second)
+passed Test 4: Порожній список
+NIL
 ```
 
 ## Варіант другої частини 11
