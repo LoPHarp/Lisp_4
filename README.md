@@ -39,7 +39,34 @@
 
 ## Лістинг реалізації першої частини завдання
 ```lisp
-;;; Лістинг реалізації
+(defun choise-Sort (lst &key (key nil) (test #'<))
+  (let ((remove-first (lambda (elem input-list)
+                        (remove elem input-list :count 1))))
+    (labels
+        ((find-min-elem (%lst min-elem key-min-elem)
+           (if (null %lst)
+               min-elem
+               (let* ((check-elem (car %lst))
+                      (key-check-elem (if key
+                                          (funcall key check-elem)
+                                          check-elem)))
+                 (if (funcall test key-check-elem key-min-elem)
+                     (find-min-elem (cdr %lst) check-elem key-check-elem)
+                     (find-min-elem (cdr %lst) min-elem key-min-elem))))
+
+
+         (sort (%lst)
+               (if (null (cdr %lst))
+                   %lst
+                   (let* ((first-min (car %lst))
+                          (key-first-min (if key
+                                             (funcall key first-min)
+                                             first-min))
+                          (min (find-min-elem (cdr %lst) first-min key-first-min))
+                          (rest (funcall remove-first min %lst))
+                          (sorted-rest (sort rest)))
+                     (cons min sorted-rest)))))))
+    (sort lst)))
 ```
 
 ### Тестові набори та утиліти першої частини
