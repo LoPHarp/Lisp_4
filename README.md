@@ -94,7 +94,23 @@ CL-USER> (mapcar (merge-spinning-tuples-fn :shift-step 2)
 
 ## Лістинг реалізації другої частини завдання
 ```lisp
-;;; Лістинг реалізації
+(defun merge-spinning-tuples-fn (&key (shift-step 1))
+  (let ((current-shift 0))
+    (labels
+        ((shift (%lst n)
+                         (if (null %lst)
+                             nil
+                             (let ((n (mod n (length %lst))))
+                               (if (= n 0)
+                                   %lst
+                                   (let*
+                                       ((new-head (nthcdr n %lst))
+                                        (new-body (subseq %lst 0 n)))
+                                     (append new-head new-body)))))))
+    (lambda (&rest args)
+      (let* ((new-args (shift args current-shift)))
+             (incf current-shift shift-step)
+        new-args)))))
 ```
 
 ### Тестові набори та утиліти другої частини
