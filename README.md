@@ -140,11 +140,28 @@ CL-USER> (mapcar (merge-spinning-tuples-fn :shift-step 2)
 
 ### Тестові набори та утиліти другої частини
 ```lisp
-;;; Лістинг реалізації утилітних тестових функцій та тестових наборів
+(defun check-merge-spinning-tuples (name lst1 lst2 lst3 shift-step expected)
+  "Виконує `mapcar` з функцією `merge-spinning-tuples-fn` і перевіряє результат."
+  (let* ((func (if shift-step 
+                   (merge-spinning-tuples-fn :shift-step shift-step)
+                   (merge-spinning-tuples-fn)))
+         (args (list lst1 lst2 lst3))
+         (result (apply #'mapcar func args)))
+    (format t "~:[FAILED~;passed~] ~a~%" (equal result expected) name)))
+
+(check-merge-spinning-tuples "test 1" '(1 2 3) '(a b c) '(x y z) nil '((1 A X) (B Y 2) (Z 3 C)))
+(check-merge-spinning-tuples "test 2" '(a b c) '(1 2 3) '(d e f) 2 '((A 1 D) (E B 2) (3 F C)))
+(check-merge-spinning-tuples "test 3" '(1 2 3 4) '(a b c d) '(x y z w) 1 '((1 A X) (B Y 2) (Z 3 C) (4 D W)))
+(check-merge-spinning-tuples "test 4" '(1 2 3 4) '(a b c d) '(x y z w) 3 '((1 A X) (2 B Y) (3 C Z) (4 D W)))
 ```
 
 ### Тестування другої частини
 ```lisp
-;;; Виклик і результат виконання тестів
+(test-merge)
+passed test 1
+passed test 2
+passed test 3
+passed test 4
+NIL
 ```
 
